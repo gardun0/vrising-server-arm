@@ -25,6 +25,15 @@ cleanup_logs() {
 }
 
 main() {
+  echo -e '
+     __      _______  _____  _____ _____ _   _  _____
+     \ \    / /  __ \|_   _|/ ____|_   _| \ | |/ ____|
+      \ \  / /| |__) | | | | (___   | | |  \| | |  __
+       \ \/ / |  _  /  | |  \___ \  | | | . ` | | |_ |
+        \  /  | | \ \ _| |_ ____) |_| |_| |\  | |__| |
+         \/   |_|  \_\_____|_____/|_____|_| \_|\_____|
+  '
+
   # Check if the script is run as root
   if [ ! -r "$server_directory" ] || [ ! -w "$server_directory" ]; then
       echo "ERROR: I do not have read/write permissions to $server_directory! Please run "chown -R 1000:1000 $server_directory" on host machine, then try again."
@@ -33,7 +42,7 @@ main() {
 
   # List all files in the server directory
   echo "Listing all files in $server_directory"
-  ls -l "$server_directory"
+  ls -lR "$server_directory"
 
   # Check if the server directory is empty
   if [ -z "$(ls -A "$server_directory")" ]; then
@@ -61,19 +70,6 @@ main() {
           echo "Creating ${server_data}/$logfile"
           touch $server_data/$logfile
   fi
-
-  echo -e '
-   __      _______  _____  _____ _____ _   _  _____
-   \ \    / /  __ \|_   _|/ ____|_   _| \ | |/ ____|
-    \ \  / /| |__) | | | | (___   | | |  \| | |  __
-     \ \/ / |  _  /  | |  \___ \  | | | . ` | | |_ |
-      \  /  | | \ \ _| |_ ____) |_| |_| |\  | |__| |
-       \/   |_|  \_\_____|_____/|_____|_| \_|\_____|
-  '
-  echo "Preparing to launch V Rising Dedicated Server"
-  echo " "
-
-  bash -c "WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine winecfg"
 
   # Also check if $server_directory/VRisingServer.exe exists
   if [ ! -f "$server_directory/VRisingServer.exe" ]; then
