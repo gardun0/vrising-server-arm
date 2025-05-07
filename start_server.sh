@@ -61,14 +61,14 @@ main() {
   echo "Preparing to launch V Rising Dedicated Server"
   echo " "
 
-  bash -c "WINEPREFIX=~/.wine-vrising WINEARCH=win64 wineboot --init"
+  bash -c "wine winecfg"
 
   echo "Launching V Rising Dedicated Server"
   echo " "
   # Start server
   v() {
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    bash -c "WINEPREFIX=~/.wine-vrising WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
+    bash -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 
