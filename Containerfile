@@ -2,28 +2,28 @@
 FROM ghcr.io/sonroyaalmerol/steamcmd-arm64 AS steamcmd
 
 # Allow passing in a custom AppID; V Rising Dedicated Server is 1829350
-ARG STEAMAPPID=1829350
-
-ENV SERVER_DIR=/home/steam/vrisingserver
+ENV STEAMAPPID=1829350 \
+    SERVER_DIR=/home/steam/vrisingserver
 
 # Create and switch into the install directory
 USER root
-RUN mkdir -p $SERVER_DIR && chown steam:steam $SERVER_DIR
+COPY scripts/download-server.sh /home/steam/download-server.sh
 
 # Download & install the server with SteamCMD
 USER steam
-RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
-    +@sSteamCmdForcePlatformType windows \
-    +force_install_dir "$SERVER_DIR" \
-    +app_update ${STEAMAPPID} validate \
-    +quit
+CMD ["/home/steam/download-server.sh"]
+#RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
+#    +@sSteamCmdForcePlatformType windows \
+#    +force_install_dir ${SERVER_DIR} \
+#    +app_update ${STEAMAPPID} validate \
+#    +quit
 
 # List the contents of the directory
-RUN set -eux; \
-    echo "Contents of $SERVER_DIR:"; \
-    ls -l $SERVER_DIR; \
-    # Echo full path to the server directory
-    echo "Server directory: $(readlink -f $SERVER_DIR)";
+#RUN set -eux; \
+#    echo "Contents of ${SERVER_DIR}:"; \
+#    ls -l ${SERVER_DIR}; \
+#    # Echo full path to the server directory
+#    echo "Server directory: $(readlink -f ${SERVER_DIR})";
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
 FROM arm64v8/ubuntu:jammy AS builder
@@ -96,7 +96,7 @@ RUN set -eux; \
 # Give read/write access to the server directory to the vrising user
 # RUN chmod -R 755 /home/vrising/server
 
-COPY start_server.sh /home/vrising/start_server.sh
+COPY scripts/start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
 
 ## Healthcheck to ensure the server is running on ports 9876 and 9877
