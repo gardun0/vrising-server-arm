@@ -62,8 +62,12 @@ main() {
   echo " "
   # Start server
   v() {
+    export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chown "$(id -u):$(id -g)" "$XDG_RUNTIME_DIR"
+
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    bash -c "wine '$hangover_cmd' 2>&1" &
+    bash -c "HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 
