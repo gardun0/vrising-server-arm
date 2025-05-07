@@ -6,21 +6,22 @@ ARG STEAMAPPID=1829350
 
 # Create and switch into the install directory
 USER root
-RUN mkdir -p /v_rising_server && chown steam:steam /v_rising_server
-USER steam
-WORKDIR /v_rising_server
+RUN mkdir -p ~/vrisingserver && chown steam:steam ~/vrisingserver
 
 # Download & install the server with SteamCMD
+USER steam
 RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
     +@sSteamCmdForcePlatformType windows \
-    +force_install_dir /v_rising_server \
+    +force_install_dir ~/vrisingserver \
     +app_update ${STEAMAPPID} validate \
     +quit
 
 # List the contents of the directory
 RUN set -eux; \
-    echo "Contents of /v_rising_server:"; \
-    ls -l /home/steam/steamcmd
+    echo "Contents of ~/vrisingserver:"; \
+    ls -l ~/vrisingserver; \
+    # Echo full path to the server directory
+    echo "Server directory: $(readlink -f ~/vrisingserver)";
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
 FROM arm64v8/ubuntu:jammy AS builder
@@ -72,19 +73,14 @@ RUN set -eux; \
 #USER vrising
 WORKDIR /home/vrising
 
-# Create data directory
-RUN mkdir -p ./data
-RUN mkdir -p ./server
-
-COPY --from=steamcmd /v_rising_server /home/vrising/server
+COPY --from=steamcmd /home/steam/vrisingserver /home/vrising/server
 
 USER root
 # Chown the server and data directories to the vrising user
 RUN chown -R 1000:1000 /home/vrising/server
-RUN chown -R 1000:1000 /home/vrising/data
 
 # Give read/write access to the server directory to the vrising user
-RUN chmod -R 755 /home/vrising/server
+# RUN chmod -R 755 /home/vrising/server
 
 COPY start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh

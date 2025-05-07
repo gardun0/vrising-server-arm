@@ -31,8 +31,15 @@ main() {
       exit 1
   fi
 
-  printf "steam_appid: "
-  cat "$server_directory/steam_appid.txt"
+  # List all files in the server directory
+  echo "Listing all files in $server_directory"
+  ls -l "$server_directory"
+
+  # Check if the server directory is empty
+  if [ -z "$(ls -A "$server_directory")" ]; then
+      echo "ERROR: $server_directory is empty! Please check your server directory."
+      exit 1
+  fi
 
   # Validate server settings directory and files
   mkdir "$server_data/Settings" 2>/dev/null
