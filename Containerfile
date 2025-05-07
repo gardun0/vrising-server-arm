@@ -1,5 +1,5 @@
 # ─── SteamCMD Stage ─────────────────────────────────────────────────────────────
-FROM cm2network/steamcmd:latest AS steamcmd
+FROM ghcr.io/sonroyaalmerol/steamcmd-arm64 AS steamcmd
 
 # Allow passing in a custom AppID; V Rising Dedicated Server is 1829350
 ARG STEAMAPPID=1829350
@@ -16,7 +16,7 @@ RUN set -eux; \
     ls -l /home/steam/steamcmd
 
 # Download & install the server with SteamCMD
-RUN /home/steam/steamcmd/steamcmd.sh +login anonymous \
+RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
     +@sSteamCmdForcePlatformType windows \
     +force_install_dir /v_rising_server \
     +app_update ${STEAMAPPID} validate \
