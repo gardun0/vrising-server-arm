@@ -81,9 +81,22 @@ fi
 
 echo "Launching V Rising Dedicated Server"
 echo " "
-# Start server
+# Start server in a headless X environment
 v() {
-  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$p" -serverName "$SERVERNAME" "$override_savename" -logFile "$p/$logfile" -nographics -batchmode "$game_port" "$query_port" 2>&1 &
+  xvfb-run -a \
+    --server-args="-screen 0 1280x720x24" \
+    env WINEARCH=win64 \
+        HODLL64=libarm64ecfex.dll \
+        HODLL=libwow64fex.dll \
+    wine /home/vrising/server/VRisingServer.exe \
+      -persistentDataPath "$p" \
+      -serverName "$SERVERNAME" \
+      "$override_savename" \
+      -logFile "$p/$logfile" \
+      -nographics \
+      -batchmode \
+      "$game_port" "$query_port" \
+    2>&1 &
 }
 
 v
