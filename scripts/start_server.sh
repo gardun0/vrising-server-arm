@@ -103,8 +103,6 @@ v() {
       -serverName "$SERVERNAME" \
       "$override_savename" \
       -logFile "$p/$logfile" \
-      -nographics \
-      -batchmode \
       -listOnSteam true \
       "$game_port" "$query_port" \
     2>&1 &
