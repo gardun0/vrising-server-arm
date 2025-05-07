@@ -62,7 +62,7 @@ main() {
   echo " "
   # Start server
   v() {
-    bash -c "WINEARCH=win32 WINEPREFIX=~/.wine wineboot --init"
+    bash -c "WINEPREFIX=~/.wine wineboot --init"
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
     bash -c "HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
