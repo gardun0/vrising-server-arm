@@ -64,7 +64,7 @@ main() {
   v() {
     # bash -c "WINEPREFIX=~/.wine wineboot --init"
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    bash -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
+    xvfb-run sh -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 

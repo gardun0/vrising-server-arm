@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates curl unzip \
     libfreetype6-dev libfontconfig1 libgl1-mesa-glx \
     libpulse0 libasound2 libopenal1 \
-    libssl-dev libxml2 jq \
+    libssl-dev libxml2 jq xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Hangover
