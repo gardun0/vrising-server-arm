@@ -1,6 +1,6 @@
 #!/bin/bash
-s=/mnt/vrising/server
-p=/mnt/vrising/persistentdata
+s=/home/vrising/server
+p=/home/vrising/data
 
 GAMEPORT=9876
 QUERYPORT=9877
