@@ -61,8 +61,8 @@ main() {
   echo "Preparing to launch V Rising Dedicated Server"
   echo " "
 
-  #  bash -c "WINEARCH=win64 wineboot --init"
-  #  bash -c "WINEARCH=win32 wineboot --init"
+  bash -c "WINEARCH=win64 wineboot --init"
+  bash -c "WINEARCH=win32 wineboot --init"
 
   echo "Launching V Rising Dedicated Server"
   echo " "
