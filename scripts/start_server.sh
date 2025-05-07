@@ -74,8 +74,8 @@ if ! [ -f "${p}/$logfile" ]; then
 fi
 
 # Also check if $server_directory/VRisingServer.exe exists
-if [ ! -f "$server_directory/VRisingServer.exe" ]; then
-  echo "ERROR: $server_directory/VRisingServer.exe not found! Please check your server directory."
+if [ ! -f "$s/VRisingServer.exe" ]; then
+  echo "ERROR: $s/VRisingServer.exe not found! Please check your server directory."
   exit 1
 fi
 
@@ -83,7 +83,7 @@ echo "Launching V Rising Dedicated Server"
 echo " "
 # Start server
 v() {
-  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$server_data" -serverName "$SERVERNAME" "$override_savename" -logFile "$server_data/$logfile" -nographics -batchmode "$game_port" "$query_port" 2>&1 &
+  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$p" -serverName "$SERVERNAME" "$override_savename" -logFile "$p/$logfile" -nographics -batchmode "$game_port" "$query_port" 2>&1 &
 }
 
 v
