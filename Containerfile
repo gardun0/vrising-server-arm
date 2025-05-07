@@ -23,12 +23,13 @@ RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
     +quit
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
-FROM ubuntu:jammy AS builder
+FROM arm64v8/ubuntu:jammy AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=UTC \
     WINEDEBUG=-all \
-    STEAMAPPID=1829350
+    STEAMAPPID=1829350 \
+    WINEPREFIX=/home/vrising/.wine
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
