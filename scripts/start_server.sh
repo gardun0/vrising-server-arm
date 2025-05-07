@@ -25,18 +25,6 @@ cleanup_logs() {
 }
 
 main() {
-  echo -e '
-     __      _______  _____  _____ _____ _   _  _____
-     \ \    / /  __ \|_   _|/ ____|_   _| \ | |/ ____|
-      \ \  / /| |__) | | | | (___   | | |  \| | |  __
-       \ \/ / |  _  /  | |  \___ \  | | | . ` | | |_ |
-        \  /  | | \ \ _| |_ ____) |_| |_| |\  | |__| |
-         \/   |_|  \_\_____|_____/|_____|_| \_|\_____|
-  '
-
-  echo "Starting V Rising Dedicated Server"
-  echo " "
-
   # Check if the script is run as root
   if [ ! -r "$server_directory" ] || [ ! -w "$server_directory" ]; then
       echo "ERROR: I do not have read/write permissions to $server_directory! Please run "chown -R 1000:1000 $server_directory" on host machine, then try again."
@@ -44,17 +32,14 @@ main() {
   fi
 
   # List all files in the server directory
-#  echo "Listing all files in $server_directory"
-#  ls -lR "$server_directory"
+  echo "Listing all files in $server_directory"
+  ls -l "$server_directory"
 
   # Check if the server directory is empty
   if [ -z "$(ls -A "$server_directory")" ]; then
       echo "ERROR: $server_directory is empty! Please check your server directory."
       exit 1
   fi
-
-  echo "Checking for server data directory..."
-  echo " "
 
   # Validate server settings directory and files
   mkdir "$server_data/Settings" 2>/dev/null
@@ -66,9 +51,6 @@ main() {
           echo "$server_data/Settings/ServerHostSettings.json not found. Copying default file."
           cp "$server_directory/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json" "$server_data/Settings/"
   fi
-
-  echo "Cleaning up old log files..."
-  echo " "
 
   cleanup_logs
 
