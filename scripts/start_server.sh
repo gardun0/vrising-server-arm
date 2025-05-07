@@ -1,60 +1,76 @@
 #!/bin/bash
+s=/mnt/vrising/server
+p=/mnt/vrising/persistentdata
 
-set -e
+GAMEPORT=9876
+QUERYPORT=9877
 
-server_directory=/home/vrising/server
-server_data=/home/vrising/data
-LOG_COUNT=30
+term_handler() {
+	echo "Shutting down Server"
 
-cleanup_logs() {
-  echo "Keeping only the latest $LOG_COUNT log files"
-
-  # Find all log files and sort them by modification time (newest first)
-  log_files=$(find "$server_data" -name "*.log" -type f -printf "%T@ %p\n" | sort -rn | cut -d' ' -f2-)
-
-  # Keep only the latest $LOGDAYS log files
-  latest_logs=$(echo "$log_files" | head -n $LOG_COUNT)
-
-  # Remove the rest of the log files
-  for log in $log_files; do
-    if ! echo "$latest_logs" | grep -q "$log"; then
-      echo "Removing old log: $log"
-      rm "$log"
-    fi
-  done
+	PID=$(pgrep -f "^${s}/VRisingServer.exe")
+	if [[ -z $PID ]]; then
+		echo "Could not find VRisingServer.exe pid. Assuming server is dead..."
+	else
+		kill -n 15 "$PID"
+		wait "$PID"
+	fi
+	wineserver -k
+	sleep 1
+	exit
 }
 
-# Check if the script is run as root
-if [ ! -r "$server_directory" ] || [ ! -w "$server_directory" ]; then
-  echo "ERROR: I do not have read/write permissions to $server_directory! Please run "chown -R 1000:1000 $server_directory" on host machine, then try again."
-  exit 1
-fi
+cleanup_logs() {
+	echo "Cleaning up logs older than $LOGDAYS days"
+	find "$p" -name "*.log" -type f -mtime +$LOGDAYS -exec rm {} \;
+}
 
-# Check if the server directory is empty
-if [ -z "$(ls -A "$server_directory")" ]; then
-  echo "ERROR: $server_directory is empty! Please check your server directory."
-  exit 1
-fi
+trap 'term_handler' SIGTERM
 
-# Validate server settings directory and files
-mkdir "$server_data/Settings" 2>/dev/null
-if [ ! -f "$server_data/Settings/ServerGameSettings.json" ]; then
-  echo "$server_data/Settings/ServerGameSettings.json not found. Copying default file."
-  cp "$server_directory/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" "$server_data/Settings/"
+if [ -z "$LOGDAYS" ]; then
+	LOGDAYS=30
 fi
-if [ ! -f "$server_data/Settings/ServerHostSettings.json" ]; then
-  echo "$server_data/Settings/ServerHostSettings.json not found. Copying default file."
-  cp "$server_directory/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json" "$server_data/Settings/"
+if [[ -n $UID ]]; then
+	usermod -u "$UID" docker 2>&1
+fi
+if [[ -n $GID ]]; then
+	groupmod -g "$GID" docker 2>&1
+fi
+if [ -z "$SERVERNAME" ]; then
+	SERVERNAME="Test Server"
+fi
+override_savename=""
+if [[ -n "$WORLDNAME" ]]; then
+	override_savename="-saveName $WORLDNAME"
+fi
+game_port=""
+if [[ -n $GAMEPORT ]]; then
+	game_port=" -gamePort $GAMEPORT"
+fi
+query_port=""
+if [[ -n $QUERYPORT ]]; then
+	query_port=" -queryPort $QUERYPORT"
 fi
 
 cleanup_logs
 
+echo " "
+mkdir "$p/Settings" 2>/dev/null
+if [ ! -f "$p/Settings/ServerGameSettings.json" ]; then
+	echo "$p/Settings/ServerGameSettings.json not found. Copying default file."
+	cp "$s/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" "$p/Settings/" 2>&1
+fi
+if [ ! -f "$p/Settings/ServerHostSettings.json" ]; then
+	echo "$p/Settings/ServerHostSettings.json not found. Copying default file."
+	cp "$s/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json" "$p/Settings/" 2>&1
+fi
+
 # Checks if log file exists, if not creates it
 current_date=$(date +"%Y%m%d-%H%M")
 logfile="$current_date-VRisingServer.log"
-if ! [ -f "$server_data/$logfile" ]; then
-  echo "Creating $server_data/$logfile"
-  touch "$server_data/$logfile"
+if ! [ -f "${p}/$logfile" ]; then
+	echo "Creating ${p}/$logfile"
+	touch "$p/$logfile"
 fi
 
 # Also check if $server_directory/VRisingServer.exe exists
@@ -67,7 +83,7 @@ echo "Launching V Rising Dedicated Server"
 echo " "
 # Start server
 v() {
-  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$server_data" -logFile "$server_data/$logfile" -nographics -batchmode 2>&1 &
+  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$server_data" -serverName "$SERVERNAME" "$override_savename" -logFile "$server_data/$logfile" -nographics -batchmode "$game_port" "$query_port" 2>&1 &
 }
 
 v
@@ -76,5 +92,5 @@ v
 ServerPID=$!
 
 # Tail log file and waits for Server PID to exit
-tail -n 0 -f "$server_data/$logfile" &
+/usr/bin/tail -n 0 -f "$p/$logfile" &
 wait $ServerPID
