@@ -55,6 +55,16 @@ fi
 cleanup_logs
 
 echo " "
+if ! grep -q -o 'avx[^ ]*' /proc/cpuinfo; then
+	unsupported_file="VRisingServer_Data/Plugins/x86_64/lib_burst_generated.dll"
+	echo "AVX or AVX2 not supported; Check if unsupported $unsupported_file exists"
+	if [ -f "$s/$unsupported_file" ]; then
+		echo "Changing $unsupported_file as attempt to fix issues..."
+		mv "$s/$unsupported_file" "$s/$unsupported_file.bak"
+	fi
+fi
+
+echo " "
 mkdir "$p/Settings" 2>/dev/null
 if [ ! -f "$p/Settings/ServerGameSettings.json" ]; then
 	echo "$p/Settings/ServerGameSettings.json not found. Copying default file."
@@ -95,6 +105,7 @@ v() {
       -logFile "$p/$logfile" \
       -nographics \
       -batchmode \
+      -listOnSteam true \
       "$game_port" "$query_port" \
     2>&1 &
 }
