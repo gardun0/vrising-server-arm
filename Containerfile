@@ -4,24 +4,26 @@ FROM ghcr.io/sonroyaalmerol/steamcmd-arm64 AS steamcmd
 # Allow passing in a custom AppID; V Rising Dedicated Server is 1829350
 ARG STEAMAPPID=1829350
 
+ENV SERVER_DIR=/home/steam/vrisingserver
+
 # Create and switch into the install directory
 USER root
-RUN mkdir -p ~/vrisingserver && chown steam:steam ~/vrisingserver
+RUN mkdir -p $SERVER_DIR && chown steam:steam $SERVER_DIR
 
 # Download & install the server with SteamCMD
 USER steam
 RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
     +@sSteamCmdForcePlatformType windows \
-    +force_install_dir ~/vrisingserver \
+    +force_install_dir "$SERVER_DIR" \
     +app_update ${STEAMAPPID} validate \
     +quit
 
 # List the contents of the directory
 RUN set -eux; \
-    echo "Contents of ~/vrisingserver:"; \
-    ls -l ~/vrisingserver; \
+    echo "Contents of $SERVER_DIR:"; \
+    ls -l $SERVER_DIR; \
     # Echo full path to the server directory
-    echo "Server directory: $(readlink -f ~/vrisingserver)";
+    echo "Server directory: $(readlink -f $SERVER_DIR)";
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
 FROM arm64v8/ubuntu:jammy AS builder
