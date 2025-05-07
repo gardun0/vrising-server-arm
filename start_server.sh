@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 server_directory=/home/vrising/server
 server_data=/home/vrising/data
 LOG_COUNT=30
@@ -61,14 +63,14 @@ main() {
   echo "Preparing to launch V Rising Dedicated Server"
   echo " "
 
-  bash -c "wine winecfg"
+  bash -c "WINEPREFIX=~/.wine-vrising WINEARCH=win64 wine winecfg"
 
   echo "Launching V Rising Dedicated Server"
   echo " "
   # Start server
   v() {
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    bash -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
+    bash -c "WINEPREFIX=~/.wine-vrising WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 
