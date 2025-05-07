@@ -4,9 +4,9 @@ set -e
 
 echo "Downloading server files..."
 
-/home/steam/steamcmd/steamcmd.sh +login anonymous \
+/home/steam/steamcmd/steamcmd.sh +force_install_dir $SERVER_DIR \
+    +login anonymous \
     +@sSteamCmdForcePlatformType windows \
-    +force_install_dir $SERVER_DIR \
     +app_update $STEAMAPPID validate \
     +quit
 
