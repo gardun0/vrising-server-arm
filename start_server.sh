@@ -63,19 +63,7 @@ main() {
   echo "Preparing to launch V Rising Dedicated Server"
   echo " "
 
-  bash -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine winecfg"
-
-  # List all files in the wine prefix directory
-  echo " "
-  echo "Listing all in $server_directory"
-  echo " "
-  ls -l "$server_directory"
-
-  # List all files in wine prefix directory
-  echo " "
-  echo "Listing all in $WINEPREFIX/drive_c"
-  echo " "
-  ls -l "$WINEPREFIX/drive_c"
+  bash -c "WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine winecfg"
 
   # Also check if $server_directory/VRisingServer.exe exists
   if [ ! -f "$server_directory/VRisingServer.exe" ]; then
@@ -88,7 +76,7 @@ main() {
   # Start server
   v() {
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    xvfb-run sh -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
+    xvfb-run sh -c "WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 

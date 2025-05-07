@@ -82,6 +82,9 @@ USER root
 RUN chown -R vrising:vrising /home/vrising/server
 RUN chown -R vrising:vrising /home/vrising/data
 
+# Give read/write access to the server directory to the vrising user
+RUN chmod -R 755 /home/vrising/server
+
 
 COPY start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
