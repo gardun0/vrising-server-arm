@@ -54,9 +54,6 @@ fi
 
 cleanup_logs
 
-# echo which FEXBash
-echo "FEXBash: $(which FEXBash)"
-
 echo " "
 mkdir "$p/Settings" 2>/dev/null
 if [ ! -f "$p/Settings/ServerGameSettings.json" ]; then
@@ -91,6 +88,7 @@ v() {
     env WINEARCH=win64 \
         HODLL64=libarm64ecfex.dll \
         HODLL=libwow64fex.dll \
+        WINEDEBUG=+all \
     wine /home/vrising/server/VRisingServer.exe \
       -persistentDataPath "$p" \
       -serverName "$SERVERNAME" \
