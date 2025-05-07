@@ -31,6 +31,9 @@ main() {
       exit 1
   fi
 
+  printf "steam_appid: "
+  cat "$server_directory/steam_appid.txt"
+
   # Validate server settings directory and files
   mkdir "$server_data/Settings" 2>/dev/null
   if [ ! -f "$server_data/Settings/ServerGameSettings.json" ]; then

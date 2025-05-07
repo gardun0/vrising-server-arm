@@ -10,17 +10,17 @@ RUN mkdir -p /v_rising_server && chown steam:steam /v_rising_server
 USER steam
 WORKDIR /v_rising_server
 
-# List the contents of the directory
-RUN set -eux; \
-    echo "Contents of /v_rising_server:"; \
-    ls -l /home/steam/steamcmd
-
 # Download & install the server with SteamCMD
 RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
     +@sSteamCmdForcePlatformType windows \
     +force_install_dir /v_rising_server \
     +app_update ${STEAMAPPID} validate \
     +quit
+
+# List the contents of the directory
+RUN set -eux; \
+    echo "Contents of /v_rising_server:"; \
+    ls -l /home/steam/steamcmd
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
 FROM arm64v8/ubuntu:jammy AS builder
@@ -68,34 +68,33 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # 4) Create non-root vrising user, init a Wine prefix under Hangover
-RUN useradd -m vrising
-USER vrising
+#RUN useradd -m vrising
+#USER vrising
 WORKDIR /home/vrising
-
-COPY --from=steamcmd /v_rising_server /home/vrising/server
 
 # Create data directory
 RUN mkdir -p ./data
+RUN mkdir -p ./server
+
+COPY --from=steamcmd /v_rising_server /home/vrising/server
 
 USER root
 # Chown the server and data directories to the vrising user
-RUN chown -R vrising:vrising /home/vrising/server
-RUN chown -R vrising:vrising /home/vrising/data
+RUN chown -R 1000:1000 /home/vrising/server
+RUN chown -R 1000:1000 /home/vrising/data
 
 # Give read/write access to the server directory to the vrising user
 RUN chmod -R 755 /home/vrising/server
 
-
 COPY start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
 
-# ─── Final Stage ──────────────────────────────────────────────────────────────
-USER vrising
-
-# Healthcheck to ensure the server is running on ports 9876 and 9877
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:9876/ || exit 1
+## Healthcheck to ensure the server is running on ports 9876 and 9877
+#HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+#    CMD curl -f http://localhost:9876/ || exit 1
 
 EXPOSE 9876/udp 9877/udp
+
+VOLUME ["/home/vrising/data"]
 
 ENTRYPOINT ["/home/vrising/start_server.sh"]
