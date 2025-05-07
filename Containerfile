@@ -23,7 +23,7 @@ RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
     +quit
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
-FROM arm64v8/ubuntu:jammy AS builder
+FROM ubuntu:jammy AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=UTC \
