@@ -63,14 +63,32 @@ main() {
   echo "Preparing to launch V Rising Dedicated Server"
   echo " "
 
-  bash -c "WINEPREFIX=~/.wine-vrising WINEARCH=win64 wine winecfg"
+  bash -c "wine winecfg"
+
+  # List all files in the wine prefix directory
+  echo " "
+  echo "Listing all in $server_directory"
+  echo " "
+  ls -l "$server_directory"
+
+  # List all files in wine prefix directory
+  echo " "
+  echo "Listing all in $WINEPREFIX"
+  echo " "
+  ls -l "$WINEPREFIX"
+
+  # Also check if $server_directory/VRisingServer.exe exists
+  if [ ! -f "$server_directory/VRisingServer.exe" ]; then
+      echo "ERROR: $server_directory/VRisingServer.exe not found! Please check your server directory."
+      exit 1
+  fi
 
   echo "Launching V Rising Dedicated Server"
   echo " "
   # Start server
   v() {
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    bash -c "WINEPREFIX=~/.wine-vrising WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
+    xvfb-run sh -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 
