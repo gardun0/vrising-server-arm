@@ -10,5 +10,12 @@ echo "Downloading server files..."
     +app_update $STEAMAPPID validate \
     +quit
 
-printf "steam_appid: "
-cat "$SERVER_DIR/steam_appid.txt
+# Check if the server directory is empty
+if [ -z "$(ls -A "$SERVER_DIR")" ]; then
+    echo "ERROR: $SERVER_DIR is empty! Please check your server directory."
+    exit 1
+fi
+
+# List all files in the server directory and every directory inside it
+echo "Listing all files in $SERVER_DIR"
+ls -lR "$SERVER_DIR"
