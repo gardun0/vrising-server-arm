@@ -11,7 +11,7 @@ COPY scripts/download-server.sh /home/steam/download-server.sh
 
 # Download & install the server with SteamCMD
 USER steam
-CMD ["/home/steam/download-server.sh"]
+RUN /home/steam/download-server.sh
 #RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
 #    +@sSteamCmdForcePlatformType windows \
 #    +force_install_dir ${SERVER_DIR} \
