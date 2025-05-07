@@ -8,6 +8,7 @@ ENV STEAMAPPID=1829350 \
 # Create and switch into the install directory
 USER root
 COPY scripts/download-server.sh /home/steam/download-server.sh
+RUN chmod +x /home/steam/download-server.sh
 
 # Download & install the server with SteamCMD
 USER steam
