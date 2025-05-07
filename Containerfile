@@ -79,6 +79,18 @@ USER root
 # Chown the server and data directories to the vrising user
 RUN chown -R 1000:1000 /home/vrising/server
 
+# List the contents of the server directory and steamapps folder if it exists
+RUN set -eux; \
+    echo "Contents of /home/vrising/server:"; \
+    ls -l /home/vrising/server; \
+    # Echo full path to the server directory
+    echo "Server directory: $(readlink -f /home/vrising/server)"; \
+    # List the contents of the steamapps folder if it exists
+    if [ -d "/home/vrising/server/steamapps" ]; then \
+        echo "Contents of /home/vrising/server/steamapps:"; \
+        ls -l /home/vrising/server/steamapps; \
+    fi
+
 # Give read/write access to the server directory to the vrising user
 # RUN chmod -R 755 /home/vrising/server
 
