@@ -63,7 +63,7 @@ main() {
   echo "Preparing to launch V Rising Dedicated Server"
   echo " "
 
-  bash -c "wine winecfg"
+  bash -c "HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine winecfg"
 
   # List all files in the wine prefix directory
   echo " "
@@ -73,9 +73,9 @@ main() {
 
   # List all files in wine prefix directory
   echo " "
-  echo "Listing all in $WINEPREFIX"
+  echo "Listing all in $WINEPREFIX/drive_c"
   echo " "
-  ls -l "$WINEPREFIX"
+  ls -l "$WINEPREFIX/drive_c"
 
   # Also check if $server_directory/VRisingServer.exe exists
   if [ ! -f "$server_directory/VRisingServer.exe" ]; then
