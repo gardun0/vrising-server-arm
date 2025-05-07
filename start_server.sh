@@ -1,26 +1,14 @@
 #!/bin/bash
-# Based on server manager from https://github.com/jammsen/docker-palworld-dedicated-server
-s=/home/vrising/server
-p=/home/vrising/data
+
+server_directory=/home/vrising/server
+server_data=/home/vrising/data
 LOG_COUNT=30
-
-
-term_handler() {
-    echo "Shutting down Server ..."
-    PID=$(pgrep -n wine64)
-    kill -n 15 $PID && wait $PID
-    wineserver -k
-    pkill Xvfb
-    sleep 1
-    echo "Server successfully shut"
-    exit
-}
 
 cleanup_logs() {
     echo "Keeping only the latest $LOG_COUNT log files"
 
     # Find all log files and sort them by modification time (newest first)
-    log_files=$(find "$p" -name "*.log" -type f -printf "%T@ %p\n" | sort -rn | cut -d' ' -f2-)
+    log_files=$(find "$server_data" -name "*.log" -type f -printf "%T@ %p\n" | sort -rn | cut -d' ' -f2-)
 
     # Keep only the latest $LOGDAYS log files
     latest_logs=$(echo "$log_files" | head -n $LOG_COUNT)
@@ -35,51 +23,54 @@ cleanup_logs() {
 }
 
 main() {
-
-  # Check if we have proper read/write permissions to /palworld
-  if [ ! -r "$s" ] || [ ! -w "$s" ]; then
-      echo "ERROR: I do not have read/write permissions to $s! Please run "chown -R 1000:1000 $s" on host machine, then try again."
+  # Check if the script is run as root
+  if [ ! -r "$server_directory" ] || [ ! -w "$server_directory" ]; then
+      echo "ERROR: I do not have read/write permissions to $server_directory! Please run "chown -R 1000:1000 $server_directory" on host machine, then try again."
       exit 1
   fi
 
-  mkdir "$p/Settings" 2>/dev/null
-  if [ ! -f "$p/Settings/ServerGameSettings.json" ]; then
-          echo "$p/Settings/ServerGameSettings.json not found. Copying default file."
-          cp "$s/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" "$p/Settings/"
+  # Validate server settings directory and files
+  mkdir "$server_data/Settings" 2>/dev/null
+  if [ ! -f "$server_data/Settings/ServerGameSettings.json" ]; then
+          echo "$server_data/Settings/ServerGameSettings.json not found. Copying default file."
+          cp "$server_directory/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" "$server_data/Settings/"
   fi
-  if [ ! -f "$p/Settings/ServerHostSettings.json" ]; then
-          echo "$p/Settings/ServerHostSettings.json not found. Copying default file."
-          cp "$s/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json" "$p/Settings/"
+  if [ ! -f "$server_data/Settings/ServerHostSettings.json" ]; then
+          echo "$server_data/Settings/ServerHostSettings.json not found. Copying default file."
+          cp "$server_directory/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json" "$server_data/Settings/"
   fi
-
-
-  # # Fix for steamclient.so not being found
-  # mkdir -p /home/steam/.steam/sdk64
-  # cp /home/steam/steamcmd/linux64/steamclient.so ~/.steam/sdk64/steamclient.so
 
   cleanup_logs
 
   # Checks if log file exists, if not creates it
   current_date=$(date +"%Y%m%d-%H%M")
   logfile="$current_date-VRisingServer.log"
-  if ! [ -f "${p}/$logfile" ]; then
-          echo "Creating ${p}/$logfile"
-          touch $p/$logfile
+  if ! [ -f "${server_data}/$logfile" ]; then
+          echo "Creating ${server_data}/$logfile"
+          touch $server_data/$logfile
   fi
 
-  echo "Launching ARM V Rising"
+  echo -e '
+   __      _______  _____  _____ _____ _   _  _____
+   \ \    / /  __ \|_   _|/ ____|_   _| \ | |/ ____|
+    \ \  / /| |__) | | | | (___   | | |  \| | |  __
+     \ \/ / |  _  /  | |  \___ \  | | | . ` | | |_ |
+      \  /  | | \ \ _| |_ ____) |_| |_| |\  | |__| |
+       \/   |_|  \_\_____|_____/|_____|_| \_|\_____|
+  '
+  echo "Launching V Rising Dedicated Server"
   echo " "
   # Start server
   v() {
-    wine64_cmd="$s/VRisingServer.exe -persistentDataPath $p -logFile $p/$logfile -nographics -batchmode"
-    bash -c "wine '$wine64_cmd' 2>&1" &
+    hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
+    bash -c "wine '$hangover_cmd' 2>&1" &
   }
   v
   # Gets the PID of the last command
-  ServerPID=$(pgrep -n wine64)
+  ServerPID=$(pgrep -n wine)
 
   # Tail log file and waits for Server PID to exit
-  tail -n 0 -f $p/$logfile &
+  tail -n 0 -f $server_data/$logfile &
   wait $ServerPID
 }
 

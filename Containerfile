@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates curl unzip \
     libfreetype6-dev libfontconfig1 libgl1-mesa-glx \
     libpulse0 libasound2 libopenal1 \
-    libssl-dev libxml2 \
+    libssl-dev libxml2 jq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Hangover
@@ -86,5 +86,11 @@ RUN chmod +x /home/vrising/start_server.sh
 
 # ─── Final Stage ──────────────────────────────────────────────────────────────
 USER vrising
+
+# Healthcheck to ensure the server is running on ports 9876 and 9877
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:9876/ || exit 1
+
 EXPOSE 9876/udp 9877/udp
+
 ENTRYPOINT ["/home/vrising/start_server.sh"]
