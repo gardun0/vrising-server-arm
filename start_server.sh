@@ -69,7 +69,7 @@ main() {
   # Start server
   v() {
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    xvfb-run sh -c "WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll hangover-wine '$hangover_cmd' 2>&1" &
+    bash -c "WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine '$hangover_cmd' 2>&1" &
     echo $!
   }
 
