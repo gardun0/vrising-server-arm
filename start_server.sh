@@ -64,10 +64,10 @@ main() {
   v() {
     hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
     bash -c "wine '$hangover_cmd' 2>&1" &
+    echo $!
   }
-  v
-  # Gets the PID of the last command
-  ServerPID=$(pgrep -n wine)
+
+  ServerPID=$(v)
 
   # Tail log file and waits for Server PID to exit
   tail -n 0 -f $server_data/$logfile &
