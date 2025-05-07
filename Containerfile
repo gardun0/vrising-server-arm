@@ -10,6 +10,10 @@ USER root
 COPY scripts/download-server.sh /home/steam/download-server.sh
 RUN chmod +x /home/steam/download-server.sh
 
+# Create the server directory and give steam user ownership
+RUN mkdir -p $SERVER_DIR && \
+    chown -R steam:steam $SERVER_DIR
+
 # Download & install the server with SteamCMD
 USER steam
 RUN /home/steam/download-server.sh
