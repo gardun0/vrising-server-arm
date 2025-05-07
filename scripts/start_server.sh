@@ -54,7 +54,7 @@ current_date=$(date +"%Y%m%d-%H%M")
 logfile="$current_date-VRisingServer.log"
 if ! [ -f "$server_data/$logfile" ]; then
   echo "Creating $server_data/$logfile"
-  touch $server_data/$logfile
+  touch "$server_data/$logfile"
 fi
 
 # Also check if $server_directory/VRisingServer.exe exists
@@ -67,7 +67,7 @@ echo "Launching V Rising Dedicated Server"
 echo " "
 # Start server
 v() {
-  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode 2>&1 &
+  WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$server_data" -logFile "$server_data/$logfile" -nographics -batchmode 2>&1 &
 }
 
 v
@@ -76,5 +76,5 @@ v
 ServerPID=$!
 
 # Tail log file and waits for Server PID to exit
-tail -n 0 -f $server_data/$logfile &
+tail -n 0 -f "$server_data/$logfile" &
 wait $ServerPID
