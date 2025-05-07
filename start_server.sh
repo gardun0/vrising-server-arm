@@ -67,7 +67,9 @@ main() {
     echo $!
   }
 
-  ServerPID=$(v)
+  v
+
+  ServerPID=$!
 
   # Tail log file and waits for Server PID to exit
   tail -n 0 -f $server_data/$logfile &
