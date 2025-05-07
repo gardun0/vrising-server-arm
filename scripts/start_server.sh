@@ -34,6 +34,9 @@ main() {
          \/   |_|  \_\_____|_____/|_____|_| \_|\_____|
   '
 
+  echo "Starting V Rising Dedicated Server"
+  echo " "
+
   # Check if the script is run as root
   if [ ! -r "$server_directory" ] || [ ! -w "$server_directory" ]; then
       echo "ERROR: I do not have read/write permissions to $server_directory! Please run "chown -R 1000:1000 $server_directory" on host machine, then try again."
@@ -41,14 +44,17 @@ main() {
   fi
 
   # List all files in the server directory
-  echo "Listing all files in $server_directory"
-  ls -lR "$server_directory"
+#  echo "Listing all files in $server_directory"
+#  ls -lR "$server_directory"
 
   # Check if the server directory is empty
   if [ -z "$(ls -A "$server_directory")" ]; then
       echo "ERROR: $server_directory is empty! Please check your server directory."
       exit 1
   fi
+
+  echo "Checking for server data directory..."
+  echo " "
 
   # Validate server settings directory and files
   mkdir "$server_data/Settings" 2>/dev/null
@@ -60,6 +66,9 @@ main() {
           echo "$server_data/Settings/ServerHostSettings.json not found. Copying default file."
           cp "$server_directory/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json" "$server_data/Settings/"
   fi
+
+  echo "Cleaning up old log files..."
+  echo " "
 
   cleanup_logs
 
@@ -81,13 +90,11 @@ main() {
   echo " "
   # Start server
   v() {
-    hangover_cmd="$server_directory/VRisingServer.exe -persistentDataPath $server_data -logFile $server_data/$logfile -nographics -batchmode"
-    WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine $hangover_cmd 2>&1 &
-    echo $!
+    WINEARCH=win64 HODLL64=libarm64ecfex.dll HODLL=libwow64fex.dll wine /home/vrising/server/VRisingServer.exe -persistentDataPath "$server_data" -logFile "$server_data/$logfile" -nographics -batchmode 2>&1 &
   }
 
   v
-
+  # Gets the PID of the last command
   ServerPID=$!
 
   # Tail log file and waits for Server PID to exit
