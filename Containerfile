@@ -17,18 +17,6 @@ RUN mkdir -p $SERVER_DIR && \
 # Download & install the server with SteamCMD
 USER steam
 RUN /home/steam/download-server.sh
-#RUN bash /home/steam/steamcmd/steamcmd.sh +login anonymous \
-#    +@sSteamCmdForcePlatformType windows \
-#    +force_install_dir ${SERVER_DIR} \
-#    +app_update ${STEAMAPPID} validate \
-#    +quit
-
-# List the contents of the directory
-#RUN set -eux; \
-#    echo "Contents of ${SERVER_DIR}:"; \
-#    ls -l ${SERVER_DIR}; \
-#    # Echo full path to the server directory
-#    echo "Server directory: $(readlink -f ${SERVER_DIR})";
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
 FROM arm64v8/ubuntu:jammy AS builder
@@ -75,9 +63,6 @@ RUN set -eux; \
     rm -f hangover.tar ./*.deb; \
     rm -rf /var/lib/apt/lists/*
 
-# 4) Create non-root vrising user, init a Wine prefix under Hangover
-#RUN useradd -m vrising
-#USER vrising
 WORKDIR /home/vrising
 
 COPY --from=steamcmd /home/steam/vrisingserver /home/vrising/server
@@ -97,9 +82,6 @@ RUN set -eux; \
         echo "Contents of /home/vrising/server/steamapps:"; \
         ls -l /home/vrising/server/steamapps; \
     fi
-
-# Give read/write access to the server directory to the vrising user
-# RUN chmod -R 755 /home/vrising/server
 
 COPY scripts/start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
