@@ -15,3 +15,5 @@ if [ -z "$(ls -A "$SERVER_DIR")" ]; then
     echo "ERROR: $SERVER_DIR is empty! Please check your server directory."
     exit 1
 fi
+
+exit 0

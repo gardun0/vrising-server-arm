@@ -86,8 +86,9 @@ v() {
   xvfb-run -a \
     --server-args="-screen 0 1280x720x24" \
     env WINEARCH=win64 \
-        HODLL64=libarm64ecfex.dll \
-        HODLL=libwow64fex.dll \
+        HODLL64=xtajit64.dll \
+        HODLL=wow64cpu.dll \
+        SteamAppId=1604030 \
     wine /home/vrising/server/VRisingServer.exe \
       -persistentDataPath "$p" \
       -serverName "$SERVERNAME" \
