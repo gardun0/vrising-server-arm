@@ -88,7 +88,6 @@ v() {
     env WINEARCH=win64 \
         HODLL64=libarm64ecfex.dll \
         HODLL=libwow64fex.dll \
-        WINEDEBUG=+loaddll,+seh \
     wine /home/vrising/server/VRisingServer.exe \
       -persistentDataPath "$p" \
       -serverName "$SERVERNAME" \
