@@ -1,87 +1,85 @@
-# ─── SteamCMD Stage ─────────────────────────────────────────────────────────────
-FROM ghcr.io/sonroyaalmerol/steamcmd-arm64 AS steamcmd
-
-# Allow passing in a custom AppID; V Rising Dedicated Server is 1829350
-ENV STEAMAPPID=1829350 \
-    SERVER_DIR=/home/steam/vrisingserver
-
-# Create and switch into the install directory
-USER root
-COPY scripts/download-server.sh /home/steam/download-server.sh
-RUN chmod +x /home/steam/download-server.sh
-
-# Create the server directory and give steam user ownership
-RUN mkdir -p $SERVER_DIR && \
-    chown -R steam:steam $SERVER_DIR
-
-# Download & install the server with SteamCMD
-USER steam
-RUN /home/steam/download-server.sh
+# # ─── SteamCMD Stage ─────────────────────────────────────────────────────────────
+# FROM ghcr.io/sonroyaalmerol/steamcmd-arm64 AS steamcmd
+#
+# # Allow passing in a custom AppID; V Rising Dedicated Server is 1829350
+# ENV STEAMAPPID=1829350 \
+#     SERVER_DIR=/home/steam/vrisingserver
+#
+# # Create and switch into the install directory
+# USER root
+# COPY scripts/download-server.sh /home/steam/download-server.sh
+# RUN chmod +x /home/steam/download-server.sh
+#
+# # Create the server directory and give steam user ownership
+# RUN mkdir -p $SERVER_DIR && \
+#     chown -R steam:steam $SERVER_DIR
+#
+# # Download & install the server with SteamCMD
+# USER steam
+# RUN /home/steam/download-server.sh
 
 # ─── Builder Stage ─────────────────────────────────────────────────────────────
-FROM arm64v8/ubuntu:jammy AS builder
+FROM ubuntu:jammy
+
+USER root
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=UTC \
-    WINEDEBUG=+loaddll,+seh \
+    WINEDEBUG=-all \
     STEAMAPPID=1829350 \
-    WINEPREFIX=/home/vrising/.wine-vrising \
-    WINEARCH=win64
+    WINEPREFIX=/home/vrising/.wine-vrising
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    qemu-user-static binfmt-support \
-    ca-certificates curl unzip \
-    libfreetype6-dev libfontconfig1 libgl1-mesa-glx \
-    libpulse0 libasound2 libopenal1 \
-    libssl-dev libxml2 jq xvfb \
+    software-properties-common wget && \
+    dpkg --add-architecture i386 && \
+    add-apt-repository multiverse && \
+    apt-get update && \
+    echo steam steam/question select "I AGREE" | debconf-set-selections && \
+    echo steam steam/license note '' | debconf-set-selections && \
+    apt-get install steamcmd -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Hangover
-WORKDIR /tmp
 
-RUN set -eux; \
-    # 1. Download the tar as before…
-    HANGOVER_URL="$(curl -sSL https://api.github.com/repos/AndreRH/hangover/releases/latest \
-                   | grep browser_download_url \
-                   | grep jammy_arm64\\.tar \
-                   | head -n1 \
-                   | cut -d '"' -f4)"; \
-    curl -sSL "$HANGOVER_URL" -o hangover.tar; \
-    \
-    tar -tvf hangover.tar; \
-    # 2. Extract ONLY the .deb files (ignore dxvk-v*.tar.gz)
-    tar -xvf hangover.tar --wildcards '*.deb'; \
-    # List the .deb files
-    echo "The following .deb files were extracted:"; \
-    ls -l; \
-    # 3. Install them via dpkg, then fix deps
-    apt-get update; \
-    apt install -y ./*.deb; \
-    \
-    # 4. Cleanup
-    rm -f hangover.tar ./*.deb; \
+# Create steam user
+RUN useradd -m -s /bin/bash steam
+
+# Install Wine
+RUN mkdir -pm755 /etc/apt/keyrings && \
+    wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key && \
+    wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/dists/$(lsb_release -cs)/winehq-$(lsb_release -cs).sources && \
+    apt-get update && \
+    apt-get install --install-recommends winehq-staging -y && \
+    apt-get install cabextract winbind screen xvfb -y && \
     rm -rf /var/lib/apt/lists/*
 
+# Check if steamcmd is installed and echo steamcmd path
+RUN set -eux; \
+    if [ -f /usr/games/steamcmd ]; then \
+        echo "SteamCMD is installed at: $(readlink -f /usr/games/steamcmd)"; \
+    else \
+        echo "SteamCMD is not installed."; \
+        exit 1; \
+    fi \
+
+# Create the server directory
+RUN mkdir -p /home/vrising/server && \
+    chown -R steam:steam /home/vrising/server
+
 WORKDIR /home/vrising
-
-COPY --from=steamcmd /home/steam/vrisingserver /home/vrising/server
-
-USER root
-# Chown the server and data directories to the vrising user
-RUN chown -R 1000:1000 /home/vrising/server
+USER steam
 
 # List the contents of the server directory and steamapps folder if it exists
-RUN set -eux; \
-    echo "Contents of /home/vrising/server:"; \
-    ls -l /home/vrising/server; \
-    # Echo full path to the server directory
-    echo "Server directory: $(readlink -f /home/vrising/server)"; \
-    # List the contents of the steamapps folder if it exists
-    if [ -d "/home/vrising/server/steamapps" ]; then \
-        echo "Contents of /home/vrising/server/steamapps:"; \
-        ls -l /home/vrising/server/steamapps; \
-    fi
+#RUN set -eux; \
+#    echo "Contents of /home/vrising/server:"; \
+#    ls -l /home/vrising/server; \
+#    # Echo full path to the server directory
+#    echo "Server directory: $(readlink -f /home/vrising/server)"; \
+#    # List the contents of the steamapps folder if it exists
+#    if [ -d "/home/vrising/server/steamapps" ]; then \
+#        echo "Contents of /home/vrising/server/steamapps:"; \
+#        ls -l /home/vrising/server/steamapps; \
+#    fi
 
 COPY scripts/start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh

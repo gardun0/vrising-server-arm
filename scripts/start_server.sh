@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 s=/home/vrising/server
 p=/home/vrising/data
 
@@ -30,12 +33,12 @@ trap 'term_handler' SIGTERM
 if [ -z "$LOGDAYS" ]; then
 	LOGDAYS=30
 fi
-if [[ -n $UID ]]; then
-	usermod -u "$UID" docker 2>&1
-fi
-if [[ -n $GID ]]; then
-	groupmod -g "$GID" docker 2>&1
-fi
+#if [[ -n $UID ]]; then
+#	usermod -u "$UID" docker 2>&1
+#fi
+#if [[ -n $GID ]]; then
+#	groupmod -g "$GID" docker 2>&1
+#fi
 if [ -z "$SERVERNAME" ]; then
 	SERVERNAME="Test Server"
 fi
@@ -53,6 +56,20 @@ if [[ -n $QUERYPORT ]]; then
 fi
 
 cleanup_logs
+
+echo "Downloading server files..."
+
+sh /usr/games/steamcmd +force_install_dir "$s" \
+    +login anonymous \
+    +@sSteamCmdForcePlatformType windows \
+    +app_update "$STEAMAPPID" validate \
+    +quit
+
+# Check if the server directory is empty
+if [ -z "$(ls -A "$s")" ]; then
+    echo "ERROR: $s is empty! Please check your server directory."
+    exit 1
+fi
 
 echo " "
 mkdir "$p/Settings" 2>/dev/null
@@ -85,17 +102,12 @@ echo " "
 v() {
   xvfb-run -a \
     --server-args="-screen 0 1280x720x24" \
-    env WINEARCH=win64 \
-        HODLL64=xtajit64.dll \
-        HODLL=wow64cpu.dll \
-        SteamAppId=1604030 \
+    env SteamAppId=1604030 \
     wine /home/vrising/server/VRisingServer.exe \
       -persistentDataPath "$p" \
       -serverName "$SERVERNAME" \
       "$override_savename" \
       -logFile "$p/$logfile" \
-      -nographics \
-      -batchmode \
       "$game_port" "$query_port" \
     2>&1 &
 }
