@@ -29,7 +29,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
     STEAMAPPID=1829350 \
     WINEPREFIX=/home/vrising/.wine-vrising
 
-# Install dependencies
+# Add user for steamcmd (Steam user)
+RUN useradd -m steam && \
+    mkdir -p /home/steam/vrising-server /home/steam/vrising-data && \
+    chown -R steam:steam /home/steam
+
+
+# Install dependencies and SteamCMD
 RUN apt-get update && apt-get install -y \
     software-properties-common wget && \
     dpkg --add-architecture i386 && \
@@ -40,11 +46,7 @@ RUN apt-get update && apt-get install -y \
     apt-get install steamcmd -y \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Create steam user
-RUN useradd -m -s /bin/bash vrising
-
-# Install Wine
+# Install Wine and dependencies
 RUN mkdir -pm755 /etc/apt/keyrings && \
     wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key && \
     wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/dists/$(lsb_release -cs)/winehq-$(lsb_release -cs).sources && \
@@ -53,40 +55,9 @@ RUN mkdir -pm755 /etc/apt/keyrings && \
     apt-get install cabextract winbind screen xvfb -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Check if steamcmd is installed and echo steamcmd path
-RUN set -eux; \
-    if [ -f /usr/games/steamcmd ]; then \
-        echo "SteamCMD is installed at: $(readlink -f /usr/games/steamcmd)"; \
-    else \
-        echo "SteamCMD is not installed."; \
-        exit 1; \
-    fi
 
-# Create the server directory
-RUN mkdir -p /home/vrising && \
-    chown -R vrising:vrising /home/vrising
-
-WORKDIR /home/vrising
-
-# List the contents of the server directory and steamapps folder if it exists
-#RUN set -eux; \
-#    echo "Contents of /home/vrising/server:"; \
-#    ls -l /home/vrising/server; \
-#    # Echo full path to the server directory
-#    echo "Server directory: $(readlink -f /home/vrising/server)"; \
-#    # List the contents of the steamapps folder if it exists
-#    if [ -d "/home/vrising/server/steamapps" ]; then \
-#        echo "Contents of /home/vrising/server/steamapps:"; \
-#        ls -l /home/vrising/server/steamapps; \
-#    fi
-
-# Create server directory
-RUN mkdir -p /home/vrising/server && \
-    chown -R vrising:vrising /home/vrising/server
-
-# Create data dir if not volume
-RUN mkdir -p /home/vrising/data && \
-    chown -R vrising:vrising /home/vrising/data
+# WORKDIR on steamcmd
+WORKDIR /home/steam
 
 COPY scripts/start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
@@ -95,10 +66,10 @@ RUN chmod +x /home/vrising/start_server.sh
 #HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 #    CMD curl -f http://localhost:9876/ || exit 1
 
-USER vrising
+USER steam
 
 EXPOSE 9876/udp 9877/udp
 
-VOLUME ["/home/vrising/data"]
+VOLUME ["/home/vrising/server-data"]
 
 ENTRYPOINT ["/home/vrising/start_server.sh"]
