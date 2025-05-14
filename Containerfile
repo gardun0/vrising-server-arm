@@ -67,7 +67,6 @@ RUN mkdir -p /home/vrising && \
     chown -R steam:steam /home/vrising
 
 WORKDIR /home/vrising
-USER steam
 
 # List the contents of the server directory and steamapps folder if it exists
 #RUN set -eux; \
@@ -82,7 +81,12 @@ USER steam
 #    fi
 
 # Create server directory
-RUN mkdir -p /home/vrising/server
+RUN mkdir -p /home/vrising/server && \
+    chown -R steam:steam /home/vrising/server
+
+# Create data dir if not volume
+RUN mkdir -p /home/vrising/data && \
+    chown -R steam:steam /home/vrising/data
 
 COPY scripts/start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
@@ -90,6 +94,8 @@ RUN chmod +x /home/vrising/start_server.sh
 ## Healthcheck to ensure the server is running on ports 9876 and 9877
 #HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 #    CMD curl -f http://localhost:9876/ || exit 1
+
+USER steam
 
 EXPOSE 9876/udp 9877/udp
 
