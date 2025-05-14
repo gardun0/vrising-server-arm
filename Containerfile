@@ -60,7 +60,7 @@ RUN set -eux; \
     else \
         echo "SteamCMD is not installed."; \
         exit 1; \
-    fi \
+    fi
 
 # Create the server directory
 RUN mkdir -p /home/vrising/server && \
