@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # Create steam user
-RUN useradd -m -s /bin/bash steam
+RUN useradd -m -s /bin/bash vrising
 
 # Install Wine
 RUN mkdir -pm755 /etc/apt/keyrings && \
@@ -64,7 +64,7 @@ RUN set -eux; \
 
 # Create the server directory
 RUN mkdir -p /home/vrising && \
-    chown -R steam:steam /home/vrising
+    chown -R vrising:vrising /home/vrising
 
 WORKDIR /home/vrising
 
@@ -82,11 +82,11 @@ WORKDIR /home/vrising
 
 # Create server directory
 RUN mkdir -p /home/vrising/server && \
-    chown -R steam:steam /home/vrising/server
+    chown -R vrising:vrising /home/vrising/server
 
 # Create data dir if not volume
 RUN mkdir -p /home/vrising/data && \
-    chown -R steam:steam /home/vrising/data
+    chown -R vrising:vrising /home/vrising/data
 
 COPY scripts/start_server.sh /home/vrising/start_server.sh
 RUN chmod +x /home/vrising/start_server.sh
@@ -95,7 +95,7 @@ RUN chmod +x /home/vrising/start_server.sh
 #HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 #    CMD curl -f http://localhost:9876/ || exit 1
 
-USER steam
+USER vrising
 
 EXPOSE 9876/udp 9877/udp
 

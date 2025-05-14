@@ -103,12 +103,12 @@ v() {
   xvfb-run -a \
     --server-args="-screen 0 1280x720x24" \
     env SteamAppId=1604030 \
-    wine /home/vrising/server/VRisingServer.exe \
+    wine "$s/VRisingServer.exe" \
       -persistentDataPath "$p" \
       -serverName "$SERVERNAME" \
-      "$override_savename" \
+      $override_savename \
       -logFile "$p/$logfile" \
-      "$game_port" "$query_port" \
+      $game_port $query_port \
     2>&1 &
 }
 
