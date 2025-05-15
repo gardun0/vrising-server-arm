@@ -70,6 +70,6 @@ USER steam
 
 EXPOSE 9876/udp 9877/udp
 
-VOLUME ["/home/vrising/server-data"]
+VOLUME ["/home/vrising/vrising-data"]
 
 ENTRYPOINT ["/home/vrising/start_server.sh"]

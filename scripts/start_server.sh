@@ -2,8 +2,8 @@
 
 set -e
 
-s=/home/vrising/server
-p=/home/vrising/data
+s=/home/steam/vrising-server
+p=/home/steam/vrising-data
 
 GAMEPORT=9876
 QUERYPORT=9877
@@ -25,7 +25,7 @@ term_handler() {
 
 cleanup_logs() {
 	echo "Cleaning up logs older than $LOGDAYS days"
-	find "$p" -name "*.log" -type f -mtime +$LOGDAYS -exec rm {} \;
+	find "$p" -name "*.log" -type f -mtime "+$LOGDAYS" -exec rm {} \;
 }
 
 trap 'term_handler' SIGTERM
@@ -59,7 +59,7 @@ cleanup_logs
 
 echo "Downloading server files..."
 
-sh /usr/games/steamcmd +force_install_dir "$s" \
+steamcmd +force_install_dir "$s" \
     +login anonymous \
     +@sSteamCmdForcePlatformType windows \
     +app_update "$STEAMAPPID" validate \
@@ -106,9 +106,9 @@ v() {
     wine "$s/VRisingServer.exe" \
       -persistentDataPath "$p" \
       -serverName "$SERVERNAME" \
-      $override_savename \
+      "$override_savename" \
       -logFile "$p/$logfile" \
-      $game_port $query_port \
+      "$game_port" "$query_port" \
     2>&1 &
 }
 
