@@ -57,8 +57,24 @@ fi
 
 cleanup_logs
 
+echo "Downloading server files..."
+
+/usr/bin/steamcmd +force_install_dir "$s" \
+    +login anonymous \
+    +@sSteamCmdForcePlatformType windows \
+    +app_update "$STEAMAPPID" validate \
+    +quit
+
+echo "Server files downloaded."
+
+# Check if the server directory is empty
+if [ -z "$(ls -A "$s")" ]; then
+    echo "ERROR: $s is empty! Please check your server directory."
+    exit 1
+fi
+
 echo " "
-mkdir "$p/Settings" 2>/dev/null
+mkdir -p "$p/Settings" 2>/dev/null
 if [ ! -f "$p/Settings/ServerGameSettings.json" ]; then
 	echo "$p/Settings/ServerGameSettings.json not found. Copying default file."
 	cp "$s/VRisingServer_Data/StreamingAssets/Settings/ServerGameSettings.json" "$p/Settings/" 2>&1

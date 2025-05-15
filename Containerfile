@@ -1,17 +1,21 @@
 FROM ubuntu:jammy
 
+VOLUME ["/home/steam/vrising-data", "/home/steam/vrising-server"]
+
 USER root
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=UTC \
+ARG DEBIAN_FRONTEND="noninteractive"
+
+ENV TZ=UTC \
     WINEDEBUG=-all \
     STEAMAPPID=1829350 \
-    WINEPREFIX=/home/vrising/.wine-vrising
+    WINEPREFIX=/home/steam/.wine
 
 # Add user for steamcmd (Steam user)
 RUN useradd -m steam && \
     mkdir -p /home/steam/vrising-server /home/steam/vrising-data && \
-    chown -R steam:steam /home/steam
+    chown -R steam:steam /home/steam && \
+    chmod -R u+rwX /home/steam
 
 
 # Install dependencies and SteamCMD
@@ -34,26 +38,20 @@ RUN mkdir -pm755 /etc/apt/keyrings && \
     apt-get install cabextract winbind screen xvfb -y && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /home/steam/.wine && \
+    chown -R steam:steam /home/steam/.wine
 
 # WORKDIR on steamcmd
+USER steam
 WORKDIR /home/steam
 
-COPY scripts/start_server.sh /home/steam/start_server.sh
-RUN chmod +x /home/steam/start_server.sh
-
-COPY scripts/download-server.sh /home/steam/download-server.sh
-RUN chmod +x /home/steam/download-server.sh
+COPY scripts/boot_server.sh /home/steam/boot_server.sh
+RUN chmod +x /home/steam/boot_server.sh
 
 ## Healthcheck to ensure the server is running on ports 9876 and 9877
 #HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 #    CMD curl -f http://localhost:9876/ || exit 1
 
-USER steam
-
-RUN /home/steam/download-server.sh
-
 EXPOSE 9876/udp 9877/udp
 
-VOLUME ["/home/steam/vrising-data"]
-
-ENTRYPOINT ["/home/steam/start_server.sh"]
+ENTRYPOINT ["/home/steam/boot_server.sh"]
