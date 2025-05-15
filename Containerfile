@@ -42,7 +42,6 @@ RUN mkdir -p /home/steam/.wine && \
     chown -R steam:steam /home/steam/.wine
 
 # WORKDIR on steamcmd
-USER steam
 WORKDIR /home/steam
 
 COPY scripts/boot_server.sh /home/steam/boot_server.sh
@@ -54,4 +53,5 @@ RUN chmod +x /home/steam/boot_server.sh
 
 EXPOSE 9876/udp 9877/udp
 
+USER steam
 ENTRYPOINT ["/home/steam/boot_server.sh"]
