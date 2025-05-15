@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -x
 
 s=/home/steam/vrising-server
 p=/home/steam/vrising-data
