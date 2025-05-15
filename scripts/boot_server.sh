@@ -59,7 +59,7 @@ cleanup_logs
 
 echo "Downloading server files..."
 
-/usr/bin/steamcmd +force_install_dir "$s" \
+/usr/games/steamcmd +force_install_dir "$s" \
     +login anonymous \
     +@sSteamCmdForcePlatformType windows \
     +app_update "$STEAMAPPID" validate \
