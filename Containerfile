@@ -1,24 +1,3 @@
-# # ─── SteamCMD Stage ─────────────────────────────────────────────────────────────
-# FROM ghcr.io/sonroyaalmerol/steamcmd-arm64 AS steamcmd
-#
-# # Allow passing in a custom AppID; V Rising Dedicated Server is 1829350
-# ENV STEAMAPPID=1829350 \
-#     SERVER_DIR=/home/steam/vrisingserver
-#
-# # Create and switch into the install directory
-# USER root
-# COPY scripts/download-server.sh /home/steam/download-server.sh
-# RUN chmod +x /home/steam/download-server.sh
-#
-# # Create the server directory and give steam user ownership
-# RUN mkdir -p $SERVER_DIR && \
-#     chown -R steam:steam $SERVER_DIR
-#
-# # Download & install the server with SteamCMD
-# USER steam
-# RUN /home/steam/download-server.sh
-
-# ─── Builder Stage ─────────────────────────────────────────────────────────────
 FROM ubuntu:jammy
 
 USER root
@@ -59,8 +38,11 @@ RUN mkdir -pm755 /etc/apt/keyrings && \
 # WORKDIR on steamcmd
 WORKDIR /home/steam
 
-COPY scripts/start_server.sh /home/vrising/start_server.sh
-RUN chmod +x /home/vrising/start_server.sh
+COPY scripts/start_server.sh /home/steam/start_server.sh
+RUN chmod +x /home/steam/start_server.sh
+
+COPY scripts/download-server.sh /home/steam/download-server.sh
+RUN chmod +x /home/steam/download-server.sh
 
 ## Healthcheck to ensure the server is running on ports 9876 and 9877
 #HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
@@ -68,8 +50,10 @@ RUN chmod +x /home/vrising/start_server.sh
 
 USER steam
 
+RUN /home/steam/download-server.sh
+
 EXPOSE 9876/udp 9877/udp
 
-VOLUME ["/home/vrising/vrising-data"]
+VOLUME ["/home/steam/vrising-data"]
 
-ENTRYPOINT ["/home/vrising/start_server.sh"]
+ENTRYPOINT ["/home/steam/start_server.sh"]
